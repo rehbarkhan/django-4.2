@@ -1,0 +1,19 @@
+FROM python:3.9-alpine
+ENV PYTHONUNBUFFERED 1
+COPY ./requirements /requirements
+COPY ./app /app
+COPY ./scripts /scripts
+RUN pip install --upgrade pip && \
+    apk add --update --no-cache postgresql-client linux-headers && \
+    apk add --update --no-cache --virtual .tmp-deps \
+        build-base musl-dev postgresql-dev  &&\
+    pip install -r ./requirements.dev.txt && \
+    adduser -D -H app && \
+    chown -R app:app /app && \
+    chmod -R 755 /app && \
+    chown -R app:app /scripts && \
+    chmod -R +x /scripts && \
+    apk del .tmp-deps 
+
+EXPOSE 8000
+WORKDIR /app
